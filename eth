@@ -1,0 +1,30 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract SimpleWallet {
+    address public owner;
+    uint public balance;
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    // 存款函数
+    function deposit() public payable {
+        balance += msg.value;
+    }
+
+    // 提现函数
+    function withdraw(uint amount) public {
+        require(msg.sender == owner, "Only the owner can withdraw");
+        require(amount <= balance, "Insufficient balance");
+        
+        balance -= amount;
+        payable(msg.sender).transfer(amount);
+    }
+
+    // 查看余额函数
+    function getBalance() public view returns(uint) {
+        return balance;
+    }
+}
