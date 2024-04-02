@@ -1,0 +1,18 @@
+const RippleAPI = require('ripple-lib').RippleAPI;
+
+// 连接到 XRP Ledger 节点
+const api = new RippleAPI({ server: 'wss://s1.ripple.com' });
+
+// 要查询余额的账户地址
+const addressToCheck = 'rXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'; // 替换为您要查询的 XRP 地址
+
+// 连接到 XRP 节点并查询账户余额
+api.connect().then(() => {
+    return api.getAccountInfo(addressToCheck);
+}).then(info => {
+    console.log('Balance:', info.xrpBalance, 'XRP');
+}).then(() => {
+    return api.disconnect();
+}).catch(error => {
+    console.error('Error occurred:', error);
+});
