@@ -1,0 +1,72 @@
+import org.p2p.solanaj.core.Account;
+import org.p2p.solanaj.core.PublicKey;
+import org.p2p.solanaj.core.Transaction;
+import org.p2p.solanaj.programs.TokenProgram;
+import org.p2p.solanaj.rpc.Environment;
+import org.p2p.solanaj.rpc.RpcApi;
+import org.p2p.solanaj.rpc.RpcClient;
+import org.p2p.solanaj.rpc.types.ConfigObjects;
+import org.p2p.solanaj.rpc.types.Commitment;
+import org.p2p.solanaj.rpc.types.Response;
+import org.p2p.solanaj.rpc.types.SignatureStatus;
+import org.p2p.solanaj.serum.AbstractSerumSwapMarket;
+import org.p2p.solanaj.serum.SerumManager;
+import org.p2p.solanaj.utils.Hex;
+import org.p2p.solanaj.utils.PrivateKey;
+
+import java.util.Base64;
+
+public class SolanaTransferExample {
+
+    public static void main(String[] args) {
+        // 创建 Solana RPC 客户端
+        RpcClient client = new RpcClient(
+            RpcApi.getApiUrl(Environment.MAINNET),
+            RpcApi.getApiUrl(Environment.MAINNET),
+            Commitment.FINALIZED
+        );
+
+        // 配置 Solana 连接
+        ConfigObjects.RpcPool rpcPool = new ConfigObjects.RpcPool();
+        rpcPool.setEndpoint(Environment.MAINNET.getEndpoint());
+        ConfigObjects configObjects = new ConfigObjects();
+        configObjects.setRpcPool(rpcPool);
+        RpcClient.setup(configObjects);
+
+        // 发送方 Solana 地址和私钥
+        String senderPrivateKey = "YOUR_SENDER_PRIVATE_KEY";
+        PrivateKey senderPrivateKeyObj = PrivateKey.fromBase58(senderPrivateKey);
+        Account senderAccount = new Account(senderPrivateKeyObj.getPrivateKey());
+
+        // 接收方 Solana 地址
+        String recipientAddress = "RECIPIENT_SOLANA_ADDRESS";
+        PublicKey recipientPublicKey = new PublicKey(recipientAddress);
+
+        // 转账数量
+        long lamports = 100000000; // 0.1 SOL
+
+        // 构建转账交易
+        Transaction transaction = TokenProgram.transfer(
+            senderAccount.getPublicKey(),
+            recipientPublicKey,
+            senderAccount.getPublicKey(),
+            lamports,
+            2 // 如果您使用的是 SPL Token，则需要提供 Token 的 Decimals
+        );
+
+        try {
+            // 签署交易
+            transaction.sign(senderAccount);
+
+            // 发送交易
+            Response<SignatureStatus> response = client.sendTransaction(transaction);
+            if (response != null && response.getResult() != null) {
+                System.out.println("Transaction hash: " + response.getResult().getValue());
+            } else {
+                System.out.println("Transaction failed.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
