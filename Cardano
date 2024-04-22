@@ -1,0 +1,34 @@
+from cardano import Cardano
+from cardano.models.transactions import Transaction, Output
+
+# 设置 Cardano 节点的连接信息
+node_url = "https://your-cardano-node-url.com:port"
+cardano = Cardano(node_url)
+
+# 发送方钱包地址
+sender_address = "source_wallet_address"
+sender_private_key = "source_wallet_private_key"
+
+# 接收方地址
+receiver_address = "destination_wallet_address"
+
+# 转账金额（以 Lovelace 为单位）
+amount_lovelace = 1000000  # 1 ADA = 1,000,000 Lovelace
+
+# 构建交易输出
+outputs = [Output(address=receiver_address, amount=amount_lovelace)]
+
+# 创建交易
+transaction = Transaction.new(
+    inputs=[sender_address],
+    outputs=outputs
+)
+
+# 签名交易
+transaction.sign(sender_private_key)
+
+# 广播交易
+tx_hash = cardano.submit(transaction)
+
+# 输出交易哈希
+print("Transaction Hash:", tx_hash)
