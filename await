@@ -1,0 +1,33 @@
+// 发送者地址和私钥
+const senderAddress = '0xYourSenderAddress';
+const privateKey = 'YOUR_PRIVATE_KEY';
+
+// 接收者地址
+const recipientAddress = '0xRecipientAddress';
+
+// 转账金额
+const amount = web3.utils.toWei('0.1', 'ether'); // 发送 0.1 ETH
+
+// 构造交易对象
+const txObject = {
+  from: senderAddress,
+  to: recipientAddress,
+  value: amount,
+  gas: 21000, // 以太坊标准 gas 限额
+  gasPrice: await web3.eth.getGasPrice(),
+  nonce: await web3.eth.getTransactionCount(senderAddress),
+};
+
+// 签名并发送交易
+const signedTx = await web3.eth.accounts.signTransaction(txObject, privateKey);
+
+web3.eth.sendSignedTransaction(signedTx.rawTransaction)
+  .on('transactionHash', (hash) => {
+    console.log('Transaction hash:', hash);
+  })
+  .on('receipt', (receipt) => {
+    console.log('Transaction receipt:', receipt);
+  })
+  .on('error', (error) => {
+    console.error('发送交易时出错:', error);
+  });
